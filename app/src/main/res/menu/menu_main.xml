@@ -13,9 +13,9 @@
         android:title="@string/next"
         app:showAsAction="always" />
     <item
-        android:id="@+id/action_tabs_using_library"
+        android:id="@+id/sign_out"
         android:orderInCategory="200"
-        android:title="@string/action_tabs_using_library"
+        android:title="@string/btn_sign_out"
         app:showAsAction="never" />
 
 </menu>

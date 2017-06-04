@@ -3,6 +3,7 @@ package com.example.rashmitiwari.we_sync;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -22,12 +23,17 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+
 
 public class MainActivity extends ActionBarActivity {
 
     private Toolbar toolbar;
     private ViewPager mPager;
     private SlidingTabLayout mTabs;
+
+    private Setting setting;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,11 +76,15 @@ public class MainActivity extends ActionBarActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
-            Toast.makeText(this, "Hey you just hit " + item.getTitle(), Toast.LENGTH_SHORT).show();
-            return true;
+            startActivity(new Intent(this, Setting.class));
         }
         if (id == R.id.action_touch_intercept_activity) {
             startActivity(new Intent(this, SubActivity.class));
+
+        }
+        if (id == R.id.sign_out) {
+          //  startActivity(new Intent(this, SubActivity.class));
+           // setting.signOut();
         }
 
         return super.onOptionsItemSelected(item);
