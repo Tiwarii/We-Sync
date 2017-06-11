@@ -47,7 +47,9 @@ public class Setting extends AppCompatActivity {
                 if (user == null) {
                     // user auth state is changed - user is null
                     // launch login activity
-                    startActivity(new Intent(Setting.this, LoginActivity.class));
+                    Intent loginIntent= new Intent(Setting.this, LoginActivity.class);
+                    loginIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    startActivity(loginIntent);
                     finish();
                 }
             }
@@ -109,7 +111,7 @@ public class Setting extends AppCompatActivity {
                                 public void onComplete(@NonNull Task<Void> task) {
                                     if (task.isSuccessful()) {
                                         Toast.makeText(Setting.this, "Email address is updated. Please sign in with new email id!", Toast.LENGTH_LONG).show();
-                                        signOut();
+                                        auth.signOut();
                                         progressBar.setVisibility(View.GONE);
                                     } else {
                                         Toast.makeText(Setting.this, "Failed to update email!", Toast.LENGTH_LONG).show();
@@ -153,7 +155,7 @@ public class Setting extends AppCompatActivity {
                                     public void onComplete(@NonNull Task<Void> task) {
                                         if (task.isSuccessful()) {
                                             Toast.makeText(Setting.this, "Password is updated, sign in with new password!", Toast.LENGTH_SHORT).show();
-                                            signOut();
+                                            auth.signOut();
                                             progressBar.setVisibility(View.GONE);
                                         } else {
                                             Toast.makeText(Setting.this, "Failed to update password!", Toast.LENGTH_SHORT).show();
@@ -235,14 +237,12 @@ public class Setting extends AppCompatActivity {
         signOut.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                signOut();
+                auth.signOut();
             }
         });
     }
 
-    public void signOut() {
-        auth.signOut();
-    }
+
 
     @Override
     protected void onResume() {

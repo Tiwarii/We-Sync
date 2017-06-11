@@ -14,6 +14,9 @@ import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.view.View;
 
+import com.google.firebase.*;
+
+
 
 /**
  * Created by Rashmi on 6/1/2017.
@@ -35,7 +38,6 @@ public class DrawingView extends View {
     private float brushSize, lastBrushSize;
 
     private boolean erase=false;
-
 
 
     public DrawingView(Context context, @Nullable AttributeSet attrs) {

@@ -34,6 +34,9 @@ public class MainActivity extends ActionBarActivity {
     private SlidingTabLayout mTabs;
 
     private Setting setting;
+    private FirebaseAuth.AuthStateListener authListener;
+    private FirebaseAuth auth;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,6 +50,22 @@ public class MainActivity extends ActionBarActivity {
                 getSupportFragmentManager().findFragmentById(R.id.fragment_navigation_drawer);
         drawerFragment.setUp(R.id.fragment_navigation_drawer,(DrawerLayout)findViewById(R.id.drawer_layout), toolbar);
 
+        final FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+
+        auth = FirebaseAuth.getInstance();
+        authListener = new FirebaseAuth.AuthStateListener() {
+            @Override
+            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                FirebaseUser user = firebaseAuth.getCurrentUser();
+                if (user == null) {
+                    // user auth state is changed - user is null
+                    // launch login activity
+                    startActivity(new Intent(MainActivity.this, LoginActivity.class));
+                    finish();
+                }
+            }
+        };
+
         mPager = (ViewPager) findViewById(R.id.pager);
         mPager.setAdapter(new MyPagerAdapter(getSupportFragmentManager()));
         mTabs = (SlidingTabLayout) findViewById(R.id.tabs);
@@ -57,6 +76,11 @@ public class MainActivity extends ActionBarActivity {
 
         mTabs.setViewPager(mPager);
 
+    }
+
+    public void onStart() {
+        super.onStart();
+        auth.addAuthStateListener(authListener);
     }
 
 
@@ -85,6 +109,7 @@ public class MainActivity extends ActionBarActivity {
         if (id == R.id.sign_out) {
           //  startActivity(new Intent(this, SubActivity.class));
            // setting.signOut();
+            FirebaseAuth.getInstance().signOut();
         }
 
         return super.onOptionsItemSelected(item);
