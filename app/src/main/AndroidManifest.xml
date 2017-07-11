@@ -30,7 +30,7 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.example.rashmitiwari.we_sync.SubActivity" />
         </activity>
-        <activity android:name=".SignUpActivity"></activity>
+        <activity android:name=".SignUpActivity" />
         <activity android:name=".ResetPasswordActivity" />
         <activity android:name=".LoginActivity">
             <intent-filter>
@@ -39,7 +39,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".Setting"></activity>
+        <activity android:name=".Setting" />
     </application>
 
 </manifest>

@@ -13,6 +13,11 @@
         android:title="@string/next"
         app:showAsAction="always" />
     <item
+        android:id="@+id/chat"
+        android:orderInCategory="200"
+        android:title="Friends"
+        app:showAsAction="never" />
+    <item
         android:id="@+id/sign_out"
         android:orderInCategory="200"
         android:title="@string/btn_sign_out"

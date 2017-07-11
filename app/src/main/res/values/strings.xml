@@ -16,6 +16,10 @@
     <string name="medium">Medium</string>
     <string name="large">Large</string>
 
+    <string name="user_successfully_added">User successfully added!</string>
+    <string name="user_unable_to_add">Unable to add user!</string>
+
+
     <string name="action_sign_in_short">Register</string>
     <string name="email">Email</string>
     <string name="minimum_password">Password too short, enter minimum 6 characters!</string>
@@ -57,4 +61,6 @@
 
     <string name="title_activity_activity_using_tab_library">ActivityUsingTabLibrary</string>
     <string name="action_tabs_using_library">Tabs With Library</string>
+    <string name="loading">loading...</string>
+    <string name="please_wait">please wait...</string>
 </resources>

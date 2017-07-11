@@ -23,6 +23,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+//import com.example.rashmitiwari.we_sync.ui.acrivity.UserListingActivity;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
@@ -58,7 +59,7 @@ public class MainActivity extends ActionBarActivity {
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
                 FirebaseUser user = firebaseAuth.getCurrentUser();
                 if (user == null) {
-                    // user auth state is changed - user is null
+                    // User auth state is changed - User is null
                     // launch login activity
                     startActivity(new Intent(MainActivity.this, LoginActivity.class));
                     finish();
@@ -105,6 +106,9 @@ public class MainActivity extends ActionBarActivity {
         if (id == R.id.action_touch_intercept_activity) {
             startActivity(new Intent(this, SubActivity.class));
 
+        }
+        if (id == R.id.chat) {
+            //startActivity(new Intent(this, UserListingActivity.class));
         }
         if (id == R.id.sign_out) {
           //  startActivity(new Intent(this, SubActivity.class));

@@ -45,7 +45,7 @@ public class LoginActivity extends AppCompatActivity {
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
                 FirebaseUser user = firebaseAuth.getCurrentUser();
                 if (user != null) {
-                    // user auth state is changed - user is null
+                    // User auth state is changed - User is null
                     // launch login activity
                     startActivity(new Intent(LoginActivity.this, MainActivity.class));
                     finish();
@@ -106,14 +106,14 @@ public class LoginActivity extends AppCompatActivity {
 
         progressBar.setVisibility(View.VISIBLE);
 
-        //authenticate user
+        //authenticate User
         auth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(LoginActivity.this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
-                        // If sign in fails, display a message to the user. If sign in succeeds
+                        // If sign in fails, display a message to the User. If sign in succeeds
                         // the auth state listener will be notified and logic to handle the
-                        // signed in user can be handled in the listener.
+                        // signed in User can be handled in the listener.
                         progressBar.setVisibility(View.GONE);
                         if (!task.isSuccessful()) {
                             // there was an error
@@ -133,4 +133,5 @@ public class LoginActivity extends AppCompatActivity {
     }
 
 }
+
 

@@ -12,6 +12,7 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+//import com.example.rashmitiwari.we_sync.core.user.AddUserPresenter;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
@@ -27,6 +28,7 @@ public class SignUpActivity extends AppCompatActivity  {
     private ProgressDialog progressDialog;
     private FirebaseAuth auth;
     private DatabaseReference mDatabase;
+   // private AddUserPresenter mAddUserPresenter;
 
 
     @Override
@@ -46,6 +48,7 @@ public class SignUpActivity extends AppCompatActivity  {
         progressDialog= new ProgressDialog(this);
         btnResetPassword = (Button) findViewById(R.id.btn_reset_password);
 
+        //mAddUserPresenter = new AddUserPresenter(this);
         btnResetPassword.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -73,6 +76,8 @@ public class SignUpActivity extends AppCompatActivity  {
        // progressBar.setVisibility(View.GONE);
     }
 
+
+
     public void signupProcess(){
         final String email = inputEmail.getText().toString().trim();
         String password = inputPassword.getText().toString().trim();
@@ -92,22 +97,27 @@ public class SignUpActivity extends AppCompatActivity  {
             makeText(getApplicationContext(), "Password too short, enter minimum 6 characters!", LENGTH_SHORT).show();
             return;
         }
+        if(!name.matches("[A-Za-z0-9]+")){
+            mUserName.setError("only alphabet or number allowed");
+        }
+
 
         progressDialog.setMessage("Sigining Up....");
         progressDialog.show();
-        //create user
+        //create User
         auth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(SignUpActivity.this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
-                        // If sign in fails, display a message to the user. If sign in succeeds
+                        // If sign in fails, display a message to the User. If sign in succeeds
                         // the auth state listener will be notified and logic to handle the
-                        // signed in user can be handled in the listener.
+                        // signed in User can be handled in the listener.
                         if (!task.isSuccessful()) {
                             makeText(SignUpActivity.this, "Authentication failed." + task.getException(),
                                     LENGTH_SHORT).show();
                         } else {
                             String user_id = auth.getCurrentUser().getUid();
+
                             DatabaseReference current_user_db= mDatabase.child(user_id);
                             current_user_db.child("name").setValue(name);
                             current_user_db.child("email").setValue(email);
