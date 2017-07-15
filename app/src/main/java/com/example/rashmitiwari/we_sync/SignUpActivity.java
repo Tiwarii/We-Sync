@@ -119,8 +119,8 @@ public class SignUpActivity extends AppCompatActivity  {
                             String user_id = auth.getCurrentUser().getUid();
 
                             DatabaseReference current_user_db= mDatabase.child(user_id);
-                            current_user_db.child("name").setValue(name);
-                            current_user_db.child("email").setValue(email);
+                            UserInformation userInformation= new UserInformation(user_id,email, name, "" );
+                            current_user_db.setValue(userInformation);
                             progressDialog.dismiss();
                             startActivity(new Intent(SignUpActivity.this, MainActivity.class));
                             finish();

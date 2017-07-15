@@ -48,7 +48,7 @@ public class SubActivity extends YouTubeBaseActivity {
 
     private FirebaseDatabase mFirebaseDatabase;
     private FirebaseAuth auth;
-    private DatabaseReference mMessageDatabaseReference;
+    private DatabaseReference mMessageDatabaseReference, mDatabaseRef;
     private ChildEventListener mChildEventListener;
     private FirebaseStorage mFirebaseStorage;
     private StorageReference mPhotoStorageReference;
@@ -63,7 +63,8 @@ public class SubActivity extends YouTubeBaseActivity {
 
         auth = FirebaseAuth.getInstance();
         mFirebaseDatabase= FirebaseDatabase.getInstance();
-        mMessageDatabaseReference= mFirebaseDatabase.getReference().child("videoTime").child("Room Id");
+        mMessageDatabaseReference= mFirebaseDatabase.getReference().child("Room Id");
+        mDatabaseRef= mFirebaseDatabase.getReference();
 
         youTubePlayerView= (YouTubePlayerView) findViewById(R.id.youtube_player_view);
         playerStateChangeListener = new MyPlayerStateChangeListener();
@@ -80,6 +81,7 @@ public class SubActivity extends YouTubeBaseActivity {
                 mplayer.setPlayerStateChangeListener(playerStateChangeListener);
                 mplayer.setPlaybackEventListener(playbackEventListener);
                 mplayer.loadVideo("a18py61_F_w");
+                mplayer.pause();
             }
 
             @Override
@@ -281,28 +283,32 @@ public class SubActivity extends YouTubeBaseActivity {
                 final DatabaseReference current_user_db= mMessageDatabaseReference.child(room_id);
                 final ReadyState readyState= new ReadyState(ReadyValue);
                 current_user_db.child(user_id).setValue(readyState);
+                mDatabaseRef.child("Users").child(user_id).child("roomId").setValue(room_id);
                 this.mJoinLeaveRoom.setText("Leave Room");
-                current_user_db.addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        ReadyState ready = dataSnapshot.child(user_id).getValue(ReadyState.class);
-                        //readyState.setReady(dataSnapshot.child(user_id).getValue(ReadyState.class).getReady());
-                        Toast.makeText(getApplicationContext(), ready.getReady(), Toast.LENGTH_SHORT).show();
-                        Log.d(TAG,"state"+ ready.getReady());
-                        if (ready.getReady().equals("no")){
-                            try {
-                                Thread.sleep(2000);
-                                alertDialog(room_id,user_id, current_user_db);
-                            } catch (InterruptedException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                    }
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
+                isEveryMemberReady();
 
-                    }
-                });
+//                current_user_db.addValueEventListener(new ValueEventListener() {
+//                    @Override
+//                    public void onDataChange(DataSnapshot dataSnapshot) {
+//                        ReadyState ready = dataSnapshot.child(user_id).getValue(ReadyState.class);
+//                        //readyState.setReady(dataSnapshot.child(user_id).getValue(ReadyState.class).getReady());
+//                        Toast.makeText(getApplicationContext(), ready.getReady(), Toast.LENGTH_SHORT).show();
+//                        //Log.d(TAG,"state"+ ready.getReady());
+//                        if (ready.getReady().equals("no")){
+//                            try {
+//                                Thread.sleep(5000);
+//                                alertDialog(room_id,user_id, current_user_db);
+//                            } catch (InterruptedException e) {
+//                                e.printStackTrace();
+//                            }
+//                        }
+//
+//                    }
+//                    @Override
+//                    public void onCancelled(DatabaseError databaseError) {
+//                        Log.w(TAG, "Failed to read value.", databaseError.toException());
+//                    }
+//                });
             }
         }
         else if(this.mJoinLeaveRoom.getText().toString().equals("Leave Room")){
@@ -314,8 +320,9 @@ public class SubActivity extends YouTubeBaseActivity {
             else {
                 Toast.makeText(getApplicationContext(), "leave room condition worked", Toast.LENGTH_SHORT).show();
                 DatabaseReference current_user_db = mMessageDatabaseReference.child(room_id);
+               // mDatabaseRef.child("Users").child(user_id).child("roomId").setValue("");
                 current_user_db.child(user_id).removeValue();
-                this.mJoinLeaveRoom.setText(" Join Room");
+                this.mJoinLeaveRoom.setText("Join Room");
             }
 
         }
@@ -340,6 +347,7 @@ public class SubActivity extends YouTubeBaseActivity {
             public void onClick(DialogInterface dialog, int which) {
                 // Write your code here to invoke NO event
                 Toast.makeText(getApplicationContext(), "You clicked on NO", Toast.LENGTH_SHORT).show();
+                current_user_db.child(user_id).child("ready").setValue(" ");
                 current_user_db.child(user_id).child("ready").setValue("no");
                 dialog.cancel();
             }
@@ -351,11 +359,38 @@ public class SubActivity extends YouTubeBaseActivity {
     }
 
     public void isEveryMemberReady(){
-        DatabaseReference mRootReference = FirebaseDatabase.getInstance().getReference().child(auth.getCurrentUser().getUid());
-        mRootReference.addValueEventListener(new ValueEventListener() {
+        mDatabaseRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                Toast.makeText(getApplicationContext(),  dataSnapshot.child("ready").getValue(String.class), Toast.LENGTH_SHORT).show();
+                String user_id= auth.getCurrentUser().getUid();
+                UserInformation userInformation= dataSnapshot.child("Users").child(user_id).getValue(UserInformation.class);
+                String room_id= userInformation.getRoomId();
+                int dbCount = (int) dataSnapshot.child("Room Id").child(room_id).getChildrenCount();
+               Toast.makeText(getApplicationContext(), room_id + "  " + dbCount, Toast.LENGTH_SHORT).show();
+                int count= 0;
+                boolean returnValue;
+                for (DataSnapshot ds : dataSnapshot.child("Room Id").child(room_id).getChildren()){
+                    ReadyState ready = ds.getValue(ReadyState.class);
+                    String readyState=  ready.getReady();
+                    if (readyState.equals("yes")) {
+                        count = count + 1;
+                        Toast.makeText(getApplicationContext(), ready.getReady() + "  "+count, Toast.LENGTH_SHORT).show();
+                    }
+
+                }
+                Toast.makeText(getApplicationContext(),  "  "+count, Toast.LENGTH_SHORT).show();
+                if (count==dbCount){
+                    try {
+                        Thread.sleep(5000);
+                        mplayer.play();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+                else {
+                    mplayer.pause();
+                }
+
 
             }
 
@@ -364,6 +399,7 @@ public class SubActivity extends YouTubeBaseActivity {
 
             }
         });
+
 
     }
 
