@@ -32,6 +32,9 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
+import static com.example.rashmitiwari.we_sync.R.id.roomId;
+
+
 public class SubActivity extends YouTubeBaseActivity {
 
     private static final int RECOVERY_REQUEST = 1;
@@ -40,6 +43,7 @@ public class SubActivity extends YouTubeBaseActivity {
     private MyPlayerStateChangeListener playerStateChangeListener;
     private MyPlaybackEventListener playbackEventListener;
     private YouTubePlayer mplayer;
+
 
     private YouTubePlayerView youTubePlayerView;
     Button mJoinLeaveRoom;
@@ -53,7 +57,9 @@ public class SubActivity extends YouTubeBaseActivity {
     private FirebaseStorage mFirebaseStorage;
     private StorageReference mPhotoStorageReference;
     EditText seekToText, mRoomId;
+    int databaseTime ;
 
+    String videoId, room_id= "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,8 +77,28 @@ public class SubActivity extends YouTubeBaseActivity {
         playbackEventListener = new MyPlaybackEventListener();
 
         seekToText = (EditText) findViewById(R.id.seek_to_text);
-        mRoomId=(EditText) findViewById(R.id.room_id);
+        mRoomId=(EditText) findViewById(roomId);
         mJoinLeaveRoom= (Button) findViewById(R.id.join_leave);
+        videoId= "a18py61_F_w";
+
+       // mplayer.seekToMillis(databaseTime);
+        mDatabaseRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                String user_id= auth.getCurrentUser().getUid();
+                UserInformation userInformation= new UserInformation();
+                userInformation.setRoomId(dataSnapshot.child("Users").child(user_id).getValue(UserInformation.class).getRoomId());
+                room_id= userInformation.getRoomId();
+               databaseTime = dataSnapshot.child("Room Id").child(room_id).child("time").getValue(int.class);
+                Toast.makeText(getApplicationContext(), databaseTime + "  " , Toast.LENGTH_SHORT).show();
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
 
         onInitializedListener= new YouTubePlayer.OnInitializedListener() {
             @Override
@@ -80,8 +106,10 @@ public class SubActivity extends YouTubeBaseActivity {
                 mplayer=player;
                 mplayer.setPlayerStateChangeListener(playerStateChangeListener);
                 mplayer.setPlaybackEventListener(playbackEventListener);
-                mplayer.loadVideo("a18py61_F_w");
-                mplayer.pause();
+                mDatabaseRef.child("Video").child(videoId).child("video Id").setValue(videoId);
+                mDatabaseRef.child("Video").child(videoId).child("room Id").setValue(room_id);
+                mplayer.cueVideo(videoId);
+                //isEveryMemberReady();
             }
 
             @Override
@@ -167,28 +195,39 @@ public class SubActivity extends YouTubeBaseActivity {
         @Override
         public void onPlaying() {
             // Called when playback starts, either due to user action or call to play().
+            isEveryMemberReady();
             showMessage("Playing");
-
-
         }
 
         @Override
         public void onPaused() {
             // Called when playback is paused, either due to user action or call to pause().
+            final int currentTime= mplayer.getCurrentTimeMillis();
+            final String user_id = auth.getCurrentUser().getUid().toString();
+            //if(!room_id.equals(""))
+            mDatabaseRef.child("Room Id").child(room_id).child("time").setValue(currentTime);
+            mDatabaseRef.child("Room Id").child(room_id).child("user").child(user_id).child("ready").setValue("no");
+            mDatabaseRef.child("Video").child(videoId).child("playerState").setValue("paused");
+            mDatabaseRef.child("Video").child(videoId).child("pausedTime").setValue(currentTime);
+            mDatabaseRef.child("Video").child(videoId).child("pausedUser").setValue(user_id);
+            //mplayer.seekToMillis(databaseTime);
+            // mplayer.pause();
             showMessage("Paused");
-            int currentTime= mplayer.getCurrentTimeMillis();
-           // seekVideo(currentTime);
+
         }
 
         @Override
         public void onStopped() {
             // Called when playback stops for a reason other than being paused.
+            mDatabaseRef.child("Video").child(videoId).child("playerState").setValue("stopped");
             showMessage("Stopped");
         }
 
         @Override
         public void onBuffering(boolean b) {
             // Called when buffering starts or ends.
+            //mDatabaseRef.child("Video").child(videoId).child("playerStste").setValue("buffering");
+           // mplayer.pause();
         }
 
         @Override
@@ -268,6 +307,8 @@ public class SubActivity extends YouTubeBaseActivity {
         }
     }
 
+
+
     public void leaveOrJoinRoom(EditText mRoomId, Button mJoinLeaveRoom) throws InterruptedException {
         final String room_id = this.mRoomId.getText().toString();
         String ReadyValue= "no";
@@ -282,33 +323,32 @@ public class SubActivity extends YouTubeBaseActivity {
 
                 final DatabaseReference current_user_db= mMessageDatabaseReference.child(room_id);
                 final ReadyState readyState= new ReadyState(ReadyValue);
-                current_user_db.child(user_id).setValue(readyState);
+                current_user_db.child("user").child(user_id).setValue(readyState);
                 mDatabaseRef.child("Users").child(user_id).child("roomId").setValue(room_id);
                 this.mJoinLeaveRoom.setText("Leave Room");
-                isEveryMemberReady();
+                //isEveryMemberReady();
 
-//                current_user_db.addValueEventListener(new ValueEventListener() {
-//                    @Override
-//                    public void onDataChange(DataSnapshot dataSnapshot) {
-//                        ReadyState ready = dataSnapshot.child(user_id).getValue(ReadyState.class);
-//                        //readyState.setReady(dataSnapshot.child(user_id).getValue(ReadyState.class).getReady());
-//                        Toast.makeText(getApplicationContext(), ready.getReady(), Toast.LENGTH_SHORT).show();
-//                        //Log.d(TAG,"state"+ ready.getReady());
-//                        if (ready.getReady().equals("no")){
-//                            try {
-//                                Thread.sleep(5000);
-//                                alertDialog(room_id,user_id, current_user_db);
-//                            } catch (InterruptedException e) {
-//                                e.printStackTrace();
-//                            }
-//                        }
-//
-//                    }
-//                    @Override
-//                    public void onCancelled(DatabaseError databaseError) {
-//                        Log.w(TAG, "Failed to read value.", databaseError.toException());
-//                    }
-//                });
+                current_user_db.addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        ReadyState ready = dataSnapshot.child("user").child(user_id).getValue(ReadyState.class);
+                        //readyState.setReady(dataSnapshot.child(user_id).getValue(ReadyState.class).getReady());
+                        //Log.d(TAG,"state"+ ready.getReady());
+                        if (ready.getReady().equals("no")){
+                            try {
+                                Thread.sleep(100);
+                                alertDialog(room_id,user_id, current_user_db);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                        }
+
+                    }
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+                        Log.w(TAG, "Failed to read value.", databaseError.toException());
+                    }
+                });
             }
         }
         else if(this.mJoinLeaveRoom.getText().toString().equals("Leave Room")){
@@ -321,7 +361,7 @@ public class SubActivity extends YouTubeBaseActivity {
                 Toast.makeText(getApplicationContext(), "leave room condition worked", Toast.LENGTH_SHORT).show();
                 DatabaseReference current_user_db = mMessageDatabaseReference.child(room_id);
                // mDatabaseRef.child("Users").child(user_id).child("roomId").setValue("");
-                current_user_db.child(user_id).removeValue();
+                current_user_db.child("user").child(user_id).removeValue();
                 this.mJoinLeaveRoom.setText("Join Room");
             }
 
@@ -337,8 +377,7 @@ public class SubActivity extends YouTubeBaseActivity {
         alertDialog.setPositiveButton("YES", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog,int which) {
                 // Write your code here to invoke YES event
-                Toast.makeText(getApplicationContext(), "You clicked on YES", Toast.LENGTH_SHORT).show();
-                current_user_db.child(user_id).child("ready").setValue("yes");
+                current_user_db.child("user").child(user_id).child("ready").setValue("yes");
 
             }
         });
@@ -346,9 +385,8 @@ public class SubActivity extends YouTubeBaseActivity {
         alertDialog.setNegativeButton("NO", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
                 // Write your code here to invoke NO event
-                Toast.makeText(getApplicationContext(), "You clicked on NO", Toast.LENGTH_SHORT).show();
-                current_user_db.child(user_id).child("ready").setValue(" ");
-                current_user_db.child(user_id).child("ready").setValue("no");
+                current_user_db.child("user").child(user_id).child("ready").setValue(" ");
+                current_user_db.child("user").child(user_id).child("ready").setValue("no");
                 dialog.cancel();
             }
         });
@@ -365,30 +403,31 @@ public class SubActivity extends YouTubeBaseActivity {
                 String user_id= auth.getCurrentUser().getUid();
                 UserInformation userInformation= dataSnapshot.child("Users").child(user_id).getValue(UserInformation.class);
                 String room_id= userInformation.getRoomId();
-                int dbCount = (int) dataSnapshot.child("Room Id").child(room_id).getChildrenCount();
-               Toast.makeText(getApplicationContext(), room_id + "  " + dbCount, Toast.LENGTH_SHORT).show();
+                int dbCount = (int) dataSnapshot.child("Room Id").child(room_id).child("user").getChildrenCount();
                 int count= 0;
                 boolean returnValue;
-                for (DataSnapshot ds : dataSnapshot.child("Room Id").child(room_id).getChildren()){
+                for (DataSnapshot ds : dataSnapshot.child("Room Id").child(room_id).child("user").getChildren()){
                     ReadyState ready = ds.getValue(ReadyState.class);
                     String readyState=  ready.getReady();
                     if (readyState.equals("yes")) {
                         count = count + 1;
-                        Toast.makeText(getApplicationContext(), ready.getReady() + "  "+count, Toast.LENGTH_SHORT).show();
                     }
 
                 }
                 Toast.makeText(getApplicationContext(),  "  "+count, Toast.LENGTH_SHORT).show();
                 if (count==dbCount){
                     try {
-                        Thread.sleep(5000);
+                        Thread.sleep(1000);
+                       // mplayer.seekToMillis(databaseTime);
                         mplayer.play();
+                        mDatabaseRef.child("Video").child(videoId).child("playerState").setValue("playing");
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
                 }
                 else {
                     mplayer.pause();
+                    mDatabaseRef.child("Video").child(videoId).child("playerState").setValue("paused");
                 }
 
 
