@@ -21,6 +21,7 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.Switch;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.rashmitiwari.we_sync.Adapter.UserListAdapter;
@@ -63,7 +64,7 @@ public class SubActivity extends YouTubeBaseActivity {
     private Switch doNotDisturnBtn;
 
     private YouTubePlayerView youTubePlayerView;
-    Button mJoinLeaveRoom;
+    ImageButton mJoinLeaveRoom, videoSearch;
     YouTubePlayer.OnInitializedListener onInitializedListener;
     ImageButton next_page, play_video, pause_video, seekLeftBtn, seekRightBtn;
 
@@ -73,8 +74,9 @@ public class SubActivity extends YouTubeBaseActivity {
     private ChildEventListener mChildEventListener;
     private FirebaseStorage mFirebaseStorage;
     private StorageReference mPhotoStorageReference;
-    EditText seekToText, mRoomId;
+    EditText seekToText, mRoomId, mVideoId;
     int databaseTime ;
+    TextView textView;
 
     private DatabaseReference userlistReference;
     private ValueEventListener mUserListListener;
@@ -99,6 +101,7 @@ public class SubActivity extends YouTubeBaseActivity {
         youTubePlayerView= (YouTubePlayerView) findViewById(R.id.youtube_player_view);
         playerStateChangeListener = new MyPlayerStateChangeListener();
         playbackEventListener = new MyPlaybackEventListener();
+        textView= (TextView) findViewById(R.id.text) ;
 
         userListView = (ListView) findViewById(R.id.memberListView);
         List<Information> informations = new ArrayList<>();
@@ -106,8 +109,10 @@ public class SubActivity extends YouTubeBaseActivity {
         userListView.setAdapter(mUserListAdapter);
 
         doNotDisturnBtn= (Switch) findViewById(R.id.do_not_disturb);
-        mRoomId=(EditText) findViewById(roomId);
-        mJoinLeaveRoom= (Button) findViewById(R.id.join_leave);
+        mRoomId=(EditText) findViewById(R.id.roomId);
+        mVideoId= (EditText) findViewById(R.id.videoId);
+        mJoinLeaveRoom= (ImageButton) findViewById(R.id.join_leave);
+        videoSearch=(ImageButton) findViewById(R.id.go);
         pause_video= (ImageButton)findViewById(R.id.pauseVideo);
         play_video= (ImageButton) findViewById(R.id.playVideo);
         seekLeftBtn= (ImageButton) findViewById(R.id.seekLeftVideo);
@@ -182,7 +187,21 @@ public class SubActivity extends YouTubeBaseActivity {
         /**
          *
          */
-       
+        pause_video.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                final int currentTime= mplayer.getCurrentTimeMillis();
+                mplayer.pause();
+                final String user_id = auth.getCurrentUser().getUid().toString();
+                //if(!room_id.equals(""))
+                mDatabaseRef.child("Room Id").child(room_id).child("time").setValue(currentTime);
+                mDatabaseRef.child("Room Id").child(room_id).child("ready").setValue("no");
+                mDatabaseRef.child("Video").child(videoId).child("playerState").setValue("paused");
+                mDatabaseRef.child("Video").child(videoId).child("pausedTime").setValue(currentTime);
+                mDatabaseRef.child("Video").child(videoId).child("pausedUser").setValue(user_id);
+            }
+        });
 
         play_video.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -337,11 +356,11 @@ public class SubActivity extends YouTubeBaseActivity {
      code to join room or leave room. Room id is entered by user and then ready state, time, user id is updated in that room
      */
 
-    public void leaveOrJoinRoom(EditText mRoomId, final Button mJoinLeaveRoom) throws InterruptedException {
+    public void leaveOrJoinRoom(final EditText mRoomId, final ImageButton mJoinLeaveRoom) throws InterruptedException {
         final String room_id = this.mRoomId.getText().toString();
         String ReadyValue= "no";
         final String user_id = auth.getCurrentUser().getUid().toString();
-        if(this.mJoinLeaveRoom.getText().toString().equals("Join Room")){
+        if(this.mJoinLeaveRoom.getTag().toString().equals("join")){
             Toast.makeText(getApplicationContext(), "join room condition worked", Toast.LENGTH_SHORT).show();
             if (TextUtils.isEmpty(room_id)){
                 Toast.makeText(getApplicationContext(), "Enter room id!", Toast.LENGTH_SHORT).show();
@@ -350,6 +369,7 @@ public class SubActivity extends YouTubeBaseActivity {
             else {
                 final DatabaseReference current_user_db= mMessageDatabaseReference.child(room_id);
                 final ReadyState readyState= new ReadyState(ReadyValue);
+
                 current_user_db.addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
@@ -359,11 +379,17 @@ public class SubActivity extends YouTubeBaseActivity {
 //
 //                        }
 //                        else{
-                            current_user_db.child("ready").setValue("no");
-                            current_user_db.child("time").setValue(0);
-                            current_user_db.child("user").child(user_id).setValue(readyState);
-                            mDatabaseRef.child("Users").child(user_id).child("roomId").setValue(room_id);
-                            mJoinLeaveRoom.setText("Leave Room");
+                        current_user_db.child("ready").setValue("no");
+                        //current_user_db.child("time").setValue(0*1000);
+                        current_user_db.child("user").child(user_id).setValue(readyState);
+                        mDatabaseRef.child("Users").child(user_id).child("roomId").setValue(room_id);
+                        mRoomId.setText("");
+                        mRoomId.setVisibility(View.GONE);
+                        textView.setVisibility(View.VISIBLE);
+                        mJoinLeaveRoom.setTag("leave");
+                        mJoinLeaveRoom.setImageResource(R.mipmap.leave);
+                        textView.setText("you have joined room "+room_id+"  ");
+
                         //}
                     }
                     @Override
@@ -372,23 +398,20 @@ public class SubActivity extends YouTubeBaseActivity {
                     }
                 });
 
-                //isEveryMemberReady();
-
             }
         }
-        else if(this.mJoinLeaveRoom.getText().toString().equals("Leave Room")){
+        else if(this.mJoinLeaveRoom.getTag().toString().equals("leave")){
 
-            if (TextUtils.isEmpty(room_id)){
-                Toast.makeText(getApplicationContext(), "Enter room id!", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            else {
                 Toast.makeText(getApplicationContext(), "leave room condition worked", Toast.LENGTH_SHORT).show();
                 DatabaseReference current_user_db = mMessageDatabaseReference.child(room_id);
                 // mDatabaseRef.child("Users").child(user_id).child("roomId").setValue("");
                 current_user_db.child("user").child(user_id).removeValue();
-                this.mJoinLeaveRoom.setText("Join Room");
-            }
+                textView.setText("");
+                textView.setVisibility(View.GONE);
+                mRoomId.setVisibility(View.VISIBLE);
+                this.mJoinLeaveRoom.setTag("join");
+            this.mJoinLeaveRoom.setImageResource(R.mipmap.join);
+
 
         }
     }

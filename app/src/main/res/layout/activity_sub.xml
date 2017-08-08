@@ -24,17 +24,29 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:orientation="horizontal">
+        <TextView
+            android:id="@+id/text"
+            android:layout_marginTop="10dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingBottom="0dp"
+            android:gravity="bottom"
+            android:textSize="20dp"/>
         <EditText
             android:id="@+id/roomId"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:hint="enter room id"/>
 
-        <Button
+
+        <ImageButton
             android:id="@+id/join_leave"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Join Room" />
+            android:background="@null"
+            android:tag="join"
+            android:src="@mipmap/join"/>
+
     </LinearLayout>
 
     <LinearLayout
@@ -48,11 +60,12 @@
             android:layout_height="wrap_content"
             android:hint="enter video url"/>
 
-        <Button
+        <ImageButton
             android:id="@+id/go"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="go" />
+            android:background="@null"
+            android:src="@mipmap/go"/>
     </LinearLayout>
 
     <view
