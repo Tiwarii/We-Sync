@@ -4,8 +4,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.example.rashmitiwari.we_sync.SubActivity"
-    android:orientation="vertical">
+    tools:context="com.example.rashmitiwari.we_sync.activity.SubActivity"
+    android:orientation="vertical"
+    android:weightSum="1">
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -27,22 +28,31 @@
             android:id="@+id/roomId"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:inputType="number"
             android:hint="enter room id"/>
-        <Button
-            android:id="@+id/creat_room"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="create" />
 
         <Button
             android:id="@+id/join_leave"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Join Room" />
+    </LinearLayout>
 
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="10dp"
+        android:orientation="horizontal">
+        <EditText
+            android:id="@+id/videoId"
+            android:layout_width="300dp"
+            android:layout_height="wrap_content"
+            android:hint="enter video url"/>
 
-
+        <Button
+            android:id="@+id/go"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="go" />
     </LinearLayout>
 
     <view
@@ -52,34 +62,71 @@
     android:layout_height="wrap_content"
     android:layout_below="@+id/relativeLayout2"
     android:layout_centerHorizontal="true" />
+
     <LinearLayout
-        android:layout_width="wrap_content"
+        android:layout_width="291dp"
         android:layout_height="50dp"
+        android:layout_below="@+id/youtube_player_view"
         android:layout_gravity="center"
         android:orientation="horizontal"
-        android:layout_below="@+id/youtube_player_view">
-
-
-        <EditText
-            android:id="@+id/seek_to_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:inputType="number"
-            android:hint="seek_to_hint"/>
-
-        <Button
-            android:id="@+id/seek_to_button"
-            android:text="seek_to"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
-
+        android:layout_weight="0.00">
 
         <ImageButton
-            android:id="@+id/nextpage"
+            android:id="@+id/playVideo"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@mipmap/ic_next"
-            />
+            android:layout_weight="1"
+            android:background="@null"
+            android:src="@mipmap/play_but" />
+
+        <ImageButton
+            android:id="@+id/pauseVideo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@null"
+            android:src="@mipmap/pause_button" />
+
+        <ImageButton
+            android:id="@+id/seekLeftVideo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@null"
+            android:src="@mipmap/seek_left" />
+
+        <ImageButton
+            android:id="@+id/seekRightVideo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@null"
+            android:src="@mipmap/seek_right" />
+
+
     </LinearLayout>
 
+    <Switch
+        android:id="@+id/do_not_disturb"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="10dp"
+        android:textSize="20dp"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="10dp"
+        android:text="Do not disturb" />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingLeft="10dp"
+        android:text="no other person will be able to enter this room"/>
+
+    <ListView
+        android:id="@+id/memberListView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:divider="@android:color/transparent"
+        android:transcriptMode="alwaysScroll"
+        tools:listitem="@layout/item_user_list"/>
 </LinearLayout>

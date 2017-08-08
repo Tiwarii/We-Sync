@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/nature_blur"
-    tools:context="com.example.rashmitiwari.we_sync.SignUpActivity"
+    tools:context="com.example.rashmitiwari.we_sync.activity.SignUpActivity"
     android:orientation="vertical">
 
     <LinearLayout

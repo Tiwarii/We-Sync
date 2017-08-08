@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:background="#FFCCCCCC"
     android:orientation="vertical"
-    tools:context=".SketchPad" >
+    tools:context=".activity.SketchPad" >
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -54,7 +54,7 @@
             android:src="@mipmap/ic_save" />
 
     </LinearLayout>
-    <com.example.rashmitiwari.we_sync.DrawingView
+    <com.example.rashmitiwari.we_sync.model.DrawingView
         android:id="@+id/drawing"
         android:layout_width="fill_parent"
         android:layout_height="0dp"

@@ -13,9 +13,9 @@
         android:title="@string/next"
         app:showAsAction="always" />
     <item
-        android:id="@+id/chat"
+        android:id="@+id/sketch"
         android:orderInCategory="200"
-        android:title="Friends"
+        android:title="Sketch Pad"
         app:showAsAction="never" />
     <item
         android:id="@+id/sign_out"
