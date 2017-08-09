@@ -194,11 +194,7 @@ public class SubActivity extends YouTubeBaseActivity {
                 final int currentTime= mplayer.getCurrentTimeMillis();
                 mplayer.pause();
                 final String user_id = auth.getCurrentUser().getUid().toString();
-                //if(!room_id.equals(""))
-                mDatabaseRef.child("Room Id").child(room_id).child("time").setValue(currentTime);
-                mDatabaseRef.child("Room Id").child(room_id).child("ready").setValue("no");
-                mDatabaseRef.child("Video").child(videoId).child("playerState").setValue("paused");
-                mDatabaseRef.child("Video").child(videoId).child("pausedTime").setValue(currentTime);
+
                 mDatabaseRef.child("Video").child(videoId).child("pausedUser").setValue(user_id);
             }
         });
@@ -277,13 +273,6 @@ public class SubActivity extends YouTubeBaseActivity {
 
         @Override
         public void onPaused() {
-            // Called when playback is paused, either due to user action or call to pause().
-            //mplayer.pause();
-//            final int currentTime= mplayer.getCurrentTimeMillis();
-//            mDatabaseRef.child("Room Id").child(room_id).child("time").setValue(currentTime);
-            mDatabaseRef.child("Room Id").child(room_id).child("ready").setValue("no");
-            mplayer.seekToMillis(databaseTime);
-            showMessage("Paused");
 
         }
 
@@ -369,34 +358,16 @@ public class SubActivity extends YouTubeBaseActivity {
             else {
                 final DatabaseReference current_user_db= mMessageDatabaseReference.child(room_id);
                 final ReadyState readyState= new ReadyState(ReadyValue);
-
-                current_user_db.addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-//                        boolean switchValue= dataSnapshot.child(room_id).child("Do not disturb").getValue(boolean.class);
-//                        if(switchValue==true){
-//                            Toast.makeText(getApplicationContext(), "your are not allowed to enter this room", Toast.LENGTH_SHORT).show();
-//
-//                        }
-//                        else{
-                        current_user_db.child("ready").setValue("no");
-                        //current_user_db.child("time").setValue(0*1000);
-                        current_user_db.child("user").child(user_id).setValue(readyState);
-                        mDatabaseRef.child("Users").child(user_id).child("roomId").setValue(room_id);
-                        mRoomId.setText("");
-                        mRoomId.setVisibility(View.GONE);
-                        textView.setVisibility(View.VISIBLE);
-                        mJoinLeaveRoom.setTag("leave");
-                        mJoinLeaveRoom.setImageResource(R.mipmap.leave);
-                        textView.setText("you have joined room "+room_id+"  ");
-
-                        //}
-                    }
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-                        Log.e(TAG, "onCancelled: "+databaseError.getMessage() );
-                    }
-                });
+                current_user_db.child("ready").setValue("no");
+                current_user_db.child("user").child(user_id).setValue(readyState);
+                mDatabaseRef.child("Users").child(user_id).child("roomId").setValue(room_id);
+                mMessageDatabaseReference.child(room_id).child("time").setValue(0);
+                mRoomId.setText("");
+                mRoomId.setVisibility(View.GONE);
+                textView.setVisibility(View.VISIBLE);
+                mJoinLeaveRoom.setTag("leave");
+                mJoinLeaveRoom.setImageResource(R.mipmap.leave);
+                textView.setText("you have joined room "+room_id+"  ");
 
             }
         }
@@ -453,22 +424,6 @@ public class SubActivity extends YouTubeBaseActivity {
         mDatabaseRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                String user_id= auth.getCurrentUser().getUid();
-                UserInformation userInformation= dataSnapshot.child("Users").child(user_id).getValue(UserInformation.class);
-                String room_id= userInformation.getRoomId();
-                int dbCount = (int) dataSnapshot.child("Room Id").child(room_id).child("user").getChildrenCount();
-                int count= 0;
-                boolean returnValue;
-                String readyState= dataSnapshot.child("Room Id").child(room_id).child("ready").getValue(String.class);
-                Toast.makeText(getApplicationContext(),  "  "+readyState+ "   is member ready", Toast.LENGTH_SHORT).show();
-                if (readyState.equals("yes")){
-                    mplayer.play();
-                }
-                else {
-                    mplayer.pause();
-                }
-
-
 
             }
             @Override

@@ -6,15 +6,8 @@ package com.example.rashmitiwari.we_sync.model;
 
 public class ReadyState {
      String ready;
-     int time;
 
-    public int getTime() {
-        return time;
-    }
 
-    public void setTime(int time) {
-        this.time = time;
-    }
 
     public ReadyState() {
     }
